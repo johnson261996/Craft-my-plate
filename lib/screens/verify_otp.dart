@@ -1,8 +1,9 @@
+import 'package:craft_my_plate/repositories/user_repository.dart';
 import 'package:craft_my_plate/utils/colours.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/showalertdialog.dart';
 import 'home_screen.dart';
@@ -20,10 +21,12 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
   bool _otpFilled = false;
   String _otp = "";
   late String smsOTP;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   String errorMessage = '';
-  String? verificationId;
+
   String? result;
+  late UserRepository user;
+
 
   //Method for handle the errors
   void handleError(PlatformException error) {
@@ -41,75 +44,25 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
     }
   }
 
-  //Method for generate otp from firebase
-  Future<void> generateOtp(String contact) async {
-    final PhoneCodeSent smsOTPSent = (String verId, [int? forceCodeResend]) {
-      verificationId = verId;
-      print("verid:$verificationId");
-    };
-    try {
-      await _auth.verifyPhoneNumber(
-          phoneNumber: contact,
-          codeAutoRetrievalTimeout: (String verId) {
-            verificationId = verId;
-          },
-          codeSent: smsOTPSent,
-          timeout: const Duration(seconds: 60),
-          verificationCompleted: (AuthCredential phoneAuthCredential) {
-
-          },
-          verificationFailed: (FirebaseAuthException  exception) {
-            // Navigator.pop(context, exception.message);
-          });
-    } catch (e) {
-      handleError(e as PlatformException);
-      // Navigator.pop(context, (e as PlatformException).message);
-    }
-  }
-
-
-  //Method for verify otp entered by user
-  Future<void> verifyOtp(BuildContext c) async {
-    print("sms OTP:$smsOTP");
-    print("verid_otp:${verificationId}");
-    if (smsOTP == null || smsOTP == '') {
-      showAlertDialog(context, 'please enter 6 digit otp');
-      return;
-    }
-    try {
-      final AuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationId!,
-        smsCode: smsOTP,
-      );
-      final UserCredential user = await _auth.signInWithCredential(credential);
-      final User? currentUser = await _auth.currentUser;
-      assert(user.user?.uid == currentUser?.uid);
-      // Navigator.pushReplacementNamed(context, '/homeScreen');
-      Navigator.pushNamed(context,"/userdetails");
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (c) =>  HomeScreen()),
-      // );
-    }  catch (e, stackTrace) {
-      print("Exception: $e\n$stackTrace");
-      showAlertDialog(context, e.toString());
-    }
-  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async{
+      user = Provider.of<UserRepository>(context, listen: false);
+    });
     print("before contact:${widget.contact}");
     result =  widget.contact!.replaceRange(3, 9,"*******");
     print("after contact:$result");
     Future.delayed(Duration(seconds: 2), ()async{
-      await generateOtp(widget.contact!);
+      await user.generateOtp(widget.contact!,context);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
         backgroundColor: kLightCream,
         extendBodyBehindAppBar: false,
@@ -163,7 +116,7 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
               height: 10,
             ),
             GestureDetector(
-              onTap: () => verifyOtp(context),
+              onTap: () => user.verifyOtp(context,smsOTP),
               child: Container(
                 margin: const EdgeInsets.all(8),
                 height: 45,

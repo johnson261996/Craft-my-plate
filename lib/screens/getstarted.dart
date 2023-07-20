@@ -2,15 +2,12 @@
 import 'dart:async';
 
 import 'package:craft_my_plate/screens/verify_otp.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import '../utils/colours.dart';
 import '../widgets/country_picker.dart';
-import '../widgets/showalertdialog.dart';
-import 'home_screen.dart';
 
 class GetStartedPage extends StatefulWidget {
   bool _isInit = true;
@@ -29,14 +26,12 @@ class _GetStartedPageState extends State<GetStartedPage> {
   bool _loading = false;
   var _dialCode = '';
   var _contact = '';
-  String? _phone;
-  String? _emailAddress;
+
   late String phoneNo;
 
 
   String errorMessage = '';
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  late Timer _timer;
+
   final _contactEditingController = TextEditingController();
 
   final GlobalKey<FormState> _key = GlobalKey();
@@ -82,21 +77,6 @@ class _GetStartedPageState extends State<GetStartedPage> {
   }
 
 
-  //Method for handle the errors
-  void handleError(PlatformException error) {
-    switch (error.code) {
-      case 'ERROR_INVALID_VERIFICATION_CODE':
-        FocusScope.of(context).requestFocus(FocusNode());
-        setState(() {
-          errorMessage = 'Invalid Code';
-        });
-        showAlertDialog(context, 'Invalid Code');
-        break;
-      default:
-        showAlertDialog(context, error.message);
-        break;
-    }
-  }
 
 
 

@@ -1,4 +1,5 @@
 
+import 'package:craft_my_plate/repositories/user_repository.dart';
 import 'package:craft_my_plate/screens/getstarted.dart';
 import 'package:craft_my_plate/screens/root_app.dart';
 import 'package:craft_my_plate/screens/splash/splash_screen1.dart';
@@ -9,11 +10,18 @@ import 'package:craft_my_plate/screens/walkthrough_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(
+      MultiProvider(
+          providers: [
+            ChangeNotifierProvider<UserRepository>(
+                create: (ctx) => UserRepository()),
+          ],
+     child: const MyApp()),);
 }
 
 class MyApp extends StatelessWidget {

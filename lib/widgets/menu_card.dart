@@ -9,7 +9,7 @@ class MenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 150,
+      height: 170,
       child: ListView.builder(
           itemCount: 10,
           scrollDirection: Axis.horizontal,
@@ -19,7 +19,7 @@ class MenuCard extends StatelessWidget {
             return Stack(
               children: [
                 Container(
-                  height: 150,
+                  height: 170,
                   padding: EdgeInsets.symmetric(horizontal: 10),
                   child: ListView.separated(
                     shrinkWrap: true,
